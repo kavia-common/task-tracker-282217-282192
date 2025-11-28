@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'checkstyle'
 	id 'org.springframework.boot' version '3.4.8'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -30,4 +31,22 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Configure Checkstyle so that CI linter task checkstyleMain/checkstyleTest exists
+checkstyle {
+	// Use a widely compatible Checkstyle version
+	toolVersion = '10.12.4'
+	// Fail build on violations to respect CI, but provide a minimal config
+	configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
+	configProperties = [
+		'checkstyle.cache.file': "${buildDir}/checkstyle/checkstyle.cache"
+	]
+}
+
+tasks.withType(Checkstyle).configureEach {
+	reports {
+		xml.required = true
+		html.required = true
+	}
 }
