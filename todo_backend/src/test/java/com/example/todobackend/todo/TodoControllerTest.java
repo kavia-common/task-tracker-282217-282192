@@ -45,12 +45,17 @@ class TodoControllerTest {
     private ObjectMapper objectMapper;
 
     private Todo buildPersisted(Long id, String title) {
+        // Default helper when specific description/dueDate aren't relevant
+        return buildPersisted(id, title, "desc", LocalDate.now().plusDays(1));
+    }
+
+    private Todo buildPersisted(Long id, String title, String description, LocalDate dueDate) {
         return new Todo()
                 .setId(id)
                 .setTitle(title)
-                .setDescription("desc")
+                .setDescription(description)
                 .setCompleted(false)
-                .setDueDate(LocalDate.now().plusDays(1))
+                .setDueDate(dueDate)
                 .setCreatedAt(Instant.now())
                 .setUpdatedAt(Instant.now());
     }
@@ -58,7 +63,7 @@ class TodoControllerTest {
     @Test
     void create_success_shouldReturn201AndBody() throws Exception {
         TodoCreateRequest req = sampleCreateRequest();
-        Todo saved = buildPersisted(1L, req.getTitle());
+        Todo saved = buildPersisted(1L, req.getTitle(), req.getDescription(), req.getDueDate());
         when(todoService.create(any(TodoCreateRequest.class))).thenReturn(saved);
 
         mockMvc.perform(post("/api/todos")
