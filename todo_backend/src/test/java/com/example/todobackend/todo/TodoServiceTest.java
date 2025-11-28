@@ -14,8 +14,11 @@ import java.util.Optional;
 import static com.example.todobackend.todo.TestDataFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.mock;
 
 class TodoServiceTest {
 
@@ -74,7 +77,7 @@ class TodoServiceTest {
     void update_put_requiresTitleAndOverwritesAll() {
         Todo existing = new Todo().setId(1L).setTitle("Old").setDescription("old").setCompleted(false).setDueDate(LocalDate.now().plusDays(1));
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
-        when(repository.save(any(Todo.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.save(any(Todo.class))).thenAnswer(inv -> inv.<Todo>getArgument(0));
 
         TodoUpdateRequest req = samplePutUpdateRequest();
         Todo updated = service.update(1L, req, true);
@@ -102,7 +105,7 @@ class TodoServiceTest {
     void update_patch_shouldOnlyApplyProvidedFields() {
         Todo existing = new Todo().setId(1L).setTitle("Old").setDescription("old").setCompleted(true).setDueDate(LocalDate.now().plusDays(2));
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
-        when(repository.save(any(Todo.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.save(any(Todo.class))).thenAnswer(inv -> inv.<Todo>getArgument(0));
 
         TodoUpdateRequest req = samplePatchUpdateRequest(); // description + completed(false)
         Todo updated = service.update(1L, req, false);
@@ -116,7 +119,7 @@ class TodoServiceTest {
     void toggleComplete_shouldFlipAndPersist() {
         Todo existing = new Todo().setId(5L).setTitle("t").setCompleted(false);
         when(repository.findById(5L)).thenReturn(Optional.of(existing));
-        when(repository.save(any(Todo.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.save(any(Todo.class))).thenAnswer(inv -> inv.<Todo>getArgument(0));
 
         Todo toggled = service.toggleComplete(5L);
         assertThat(toggled.isCompleted()).isTrue();
